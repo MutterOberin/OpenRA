@@ -16,8 +16,8 @@ Chn1ActorTriggerActivator = { Chn1Activator1, Chn1Activator2, Chn1Activator3, Ch
 Chn2ActorTriggerActivator = { Chn2Activator1, Chn2Activator2, Chn2Activator3 }
 Obj2ActorTriggerActivator = { Chn1Activator1, Chn1Activator2, Chn1Activator3, Chn1Activator4, Chn1Activator5, Chn2Activator1, Chn2Activator2, Chn2Activator3, Atk3Activator }
 
-Chn1Waypoints = { ChnEnrty.Location, waypoint5.Location }
-Chn2Waypoints = { ChnEnrty.Location, waypoint6.Location }
+Chn1Waypoints = { ChnEntry.Location, waypoint5.Location }
+Chn2Waypoints = { ChnEntry.Location, waypoint6.Location }
 Gdi3Waypoints = { waypoint1, waypoint3, waypoint7, waypoint8, waypoint9 }
 Gdi4Waypoints = { waypoint4, waypoint10, waypoint9, waypoint11, waypoint9, waypoint10 }
 Gdi5Waypoints = { waypoint1, waypoint4 }
@@ -76,7 +76,7 @@ Atk3TriggerFunction = function()
 			local target = targets[DateTime.GameTime % #targets + 1].CenterPosition
 
 			if target then
-				Radar.SendAirstrike(target, false, 256 - 28)
+				Radar.SendAirstrike(target, false, Facing.NorthEast + 4)
 			end
 		end
 	end
@@ -166,7 +166,7 @@ WorldLoaded = function()
 
 	Trigger.OnEnteredFootprint(Chn3CellTriggerActivator, function(a, id)
 		if a.Owner == Nod then
-			Reinforcements.Reinforce(Nod, { 'tran' }, { ChnEnrty.Location, waypoint17.Location }, 11)
+			Reinforcements.Reinforce(Nod, { 'tran' }, { ChnEntry.Location, waypoint17.Location }, 11)
 			Trigger.RemoveFootprintTrigger(id)
 		end
 	end)
@@ -189,7 +189,7 @@ WorldLoaded = function()
 	end)
 
 	Trigger.OnEnteredFootprint(Win2CellTriggerActivator, function(a, id)
-		if a.Owner == Nod then
+		if a.Owner == Nod and NodObjective1 then
 			Nod.MarkCompletedObjective(NodObjective3)
 			Trigger.RemoveFootprintTrigger(id)
 		end

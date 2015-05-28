@@ -62,6 +62,7 @@ GuardHarvester = function(unit, harvester)
 	end
 end
 
+ticked = TimerTicks
 Tick = function()
 	if soviets.HasNoRequiredUnits() then
 		if DestroyObj then
@@ -98,9 +99,17 @@ Tick = function()
 		end
 	end
 
-	if DateTime.Minutes(5) == TimerTicks - DateTime.GameTime then
+	if DateTime.Minutes(5) == ticked then
 		Media.PlaySpeechNotification(allies, "WarningFiveMinutesRemaining")
 		InitCountDown()
+	end
+
+	if ticked > 0 then
+		UserInterface.SetMissionText("Soviet reinforcements arrive in " .. Utils.FormatTime(ticked), TimerColor)
+		ticked = ticked - 1
+	elseif ticked == 0 then
+		FinishTimer()
+		ticked = ticked - 1
 	end
 end
 
@@ -140,27 +149,29 @@ SpawnAndAttack = function(types, entry)
 	return units
 end
 
+SendFrenchReinforcements = function()
+	local camera = Actor.Create("camera", true, { Owner = allies, Location = SovietRally1.Location })
+	Media.PlaySpeechNotification(allies, "AlliedReinforcementsArrived")
+	Reinforcements.Reinforce(allies, FrenchSquad, { FranceEntry.Location, FranceRally.Location })
+	Trigger.AfterDelay(DateTime.Seconds(3), function() camera.Destroy() end)
+end
+
 FrenchReinforcements = function()
 	Camera.Position = SovietRally1.CenterPosition
-	local camera = Actor.Create("camera", true, { Owner = allies, Location = SovietRally1.Location })
 
 	if drum1.IsDead or drum2.IsDead or drum3.IsDead then
-		Media.PlaySpeechNotification(allies, "AlliedReinforcementsArrived")
-		Reinforcements.Reinforce(allies, FrenchSquad, { FranceEntry.Location, FranceRally.Location })
-		Trigger.AfterDelay(DateTime.Seconds(3), function() camera.Destroy() end)
+		SendFrenchReinforcements()
 		return
 	end
 
 	powerproxy = Actor.Create("powerproxy.parabombs", false, { Owner = allies })
-	powerproxy.SendAirstrike(drum1.CenterPosition, false, 256 - 28)
-	powerproxy.SendAirstrike(drum2.CenterPosition, false, 256 - 32)
-	powerproxy.SendAirstrike(drum3.CenterPosition, false, 256 - 36)
+	powerproxy.SendAirstrike(drum1.CenterPosition, false, Facing.NorthEast + 4)
+	powerproxy.SendAirstrike(drum2.CenterPosition, false, Facing.NorthEast)
+	powerproxy.SendAirstrike(drum3.CenterPosition, false, Facing.NorthEast - 4)
 	powerproxy.Destroy()
 
 	Trigger.AfterDelay(DateTime.Seconds(3), function()
-		Media.PlaySpeechNotification(allies, "AlliedReinforcementsArrived")
-		Reinforcements.Reinforce(allies, FrenchSquad, { FranceEntry.Location, FranceRally.Location })
-		Trigger.AfterDelay(DateTime.Seconds(3), function() camera.Destroy() end)
+		SendFrenchReinforcements()
 	end)
 end
 
@@ -193,6 +204,18 @@ FinalAttack = function()
 		end
 		allies.MarkCompletedObjective(SurviveObj)
 	end)
+end
+
+FinishTimer = function()
+	for i = 0, 9, 1 do
+		local c = TimerColor
+		if i % 2 == 0 then
+			c = HSLColor.White
+		end
+
+		Trigger.AfterDelay(DateTime.Seconds(i), function() UserInterface.SetMissionText("Soviet reinforcements have arrived!", c) end)
+	end
+	Trigger.AfterDelay(DateTime.Seconds(10), function() UserInterface.SetMissionText("") end)
 end
 
 wave = 1
@@ -277,6 +300,7 @@ end
 
 InitMission = function()
 	Camera.Position = AlliesBase.CenterPosition
+	TimerColor = HSLColor.Red
 
 	Trigger.AfterDelay(DateTime.Seconds(1), function() Media.PlaySpeechNotification(allies, "MissionTimerInitialised") end)
 
@@ -286,7 +310,6 @@ InitMission = function()
 		SpawnSovietVehicle(NewSovietEntryPoints, NewSovietRallyPoints)
 		FinalAttack()
 		Producing = false
-		Timer.Destroy()
 	end)
 
 	Trigger.AfterDelay(AttackTicks, SendParadrops)

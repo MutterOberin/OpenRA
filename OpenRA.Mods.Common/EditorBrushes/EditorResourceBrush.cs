@@ -87,6 +87,9 @@ namespace OpenRA.Mods.Common.Widgets
 
 			var tile = world.Map.MapTiles.Value[cell];
 			var tileInfo = world.TileSet.GetTileInfo(tile);
+			if (tileInfo == null)
+				return false;
+
 			var terrainType = world.TileSet.TerrainInfo[tileInfo.TerrainType];
 
 			if (world.Map.MapResources.Value[cell].Type == ResourceType.ResourceType)
@@ -95,7 +98,7 @@ namespace OpenRA.Mods.Common.Widgets
 			if (!ResourceType.AllowedTerrainTypes.Contains(terrainType.Type))
 				return false;
 
-			return ResourceType.AllowOnRamps || tileInfo == null || tileInfo.RampType == 0;
+			return ResourceType.AllowOnRamps || tileInfo.RampType == 0;
 		}
 
 		public void Tick()

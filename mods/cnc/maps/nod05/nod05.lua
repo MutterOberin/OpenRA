@@ -46,7 +46,7 @@ SendGDIAirstrike = function()
 		local target = getAirstrikeTarget()
 
 		if target then
-			Radar.SendAirstrike(target, false, 256 - 28)
+			Radar.SendAirstrike(target, false, Facing.NorthEast + 4)
 			Trigger.AfterDelay(AirstrikeDelay, SendGDIAirstrike)
 		else
 			Trigger.AfterDelay(AirstrikeDelay/4, SendGDIAirstrike)
@@ -295,9 +295,9 @@ checkProduction = function(player)
 			end
 		end
 		if #UnitsType > 0 then
-			if (type == 'jeep' or type == 'mtnk') and not Factory.IsDead then
+			if (type == 'jeep' or type == 'mtnk') and not Factory.IsDead and Factory.Owner == gdi then
 				Factory.Build(UnitsType)
-			elseif (type == 'e1' or type == 'e2') and not Barracks.IsDead then
+			elseif (type == 'e1' or type == 'e2') and not Barracks.IsDead and Barracks.Owner == gdi then
 				Barracks.Build(UnitsType)
 			end
 		end
